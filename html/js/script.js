@@ -13,13 +13,19 @@ window.addEventListener('message', function(event) {
 
 // Function to send data back to the client script
 function postNUIMessage(data) {
-    fetch(`https://${GetParentResourceName()}/` + data.type, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(data.data || {})
-    });
+    // Only try to use FiveM fetch when running in FiveM
+    if (typeof GetParentResourceName === 'function' && !window.inBrowserTest) {
+        fetch(`https://${GetParentResourceName()}/` + data.type, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data.data || {})
+        });
+    } else {
+        // In browser testing environment, this is handled by browser-mock.js
+        console.log('NUI Message (Browser Test):', data);
+    }
 }
 
 // Close NUI when ESC is pressed

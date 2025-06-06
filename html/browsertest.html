@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LC Minigames Browser Test</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Browser testing specific styles */
+        body {
+            background-color: #333;
+        }
+        #minigames-container {
+            display: block;
+        }
+        #wheel-removal-game {
+            display: block;
+        }
+        .browser-controls {
+            margin-top: 20px;
+            text-align: center;
+            padding: 10px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 5px;
+        }
+        button {
+            padding: 8px 16px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 0 5px;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        select {
+            padding: 8px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Main container for all minigames -->
+    <div id="minigames-container">
+        <!-- Wheel Removal Game -->
+        <div id="wheel-removal-game" class="minigame">
+            <div class="game-header">
+                <h2>Wheel Removal</h2>
+                <div id="timer">Time: <span id="time-left">0</span>s</div>
+                <div id="progress">Progress: <span id="clicks-done">0</span>/<span id="clicks-required">0</span></div>
+                <div id="errors">Errors: <span id="error-count">0</span>/<span id="error-limit">0</span></div>
+            </div>
+            
+            <div class="game-area">
+                <div id="wheel-image">
+                    <div class="bolt bolt-1"></div>
+                    <div class="bolt bolt-2"></div>
+                    <div class="bolt bolt-3"></div>
+                    <div class="bolt bolt-4"></div>
+                    <div class="bolt bolt-5"></div>
+                </div>
+                <div id="tool-selection">
+                    <div class="tool" data-tool="wrench">Wrench</div>
+                    <div class="tool" data-tool="impact">Impact Driver</div>
+                </div>
+                <div id="instructions">
+                    Select the correct tool and click on the highlighted bolt to loosen it.
+                </div>
+            </div>
+        </div>
+
+        <!-- Browser Testing Controls -->
+        <div class="browser-controls">
+            <h3>Browser Testing Controls</h3>
+            <div>
+                <select id="difficulty-select">
+                    <option value="Easy">Easy</option>
+                    <option value="Medium" selected>Medium</option>
+                    <option value="Hard">Hard</option>
+                </select>
+                <button id="start-game">Start Game</button>
+                <button id="reset-game">Reset Game</button>
+            </div>
+            <div id="game-result" style="margin-top: 10px; font-weight: bold;"></div>
+        </div>
+    </div>
+
+    <script src="js/browser-mock.js"></script>
+    <script src="js/wheel_removal.js"></script>
+    <script src="js/browser-test.js"></script>
+</body>
+</html>

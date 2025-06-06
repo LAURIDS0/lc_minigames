@@ -122,6 +122,43 @@ function setupGame() {
         bolt.addEventListener('click', function() {
             if (!gameState.active) return;
             
+            // Check if this is the highlighted bolt
+            const boltNumber = parseInt(this.className.match(/bolt-(\d+)/)[1]);
+            
+            if (boltNumber === gameState.currentBolt) {
+                // Check if the correct tool is selected
+                if (gameState.selectedTool === gameState.correctTool) {
+                    // Success - bolt removed correctly
+                    this.classList.remove('highlight');
+                    this.classList.add('removed');
+                    
+                    // Increment click count
+                    gameState.clicksDone++;
+                    document.getElementById('clicks-done').textContent = gameState.clicksDone;
+                    
+                    // Check if all bolts are removed
+                    if (gameState.clicksDone >= gameConfig.clicksRequired) {
+                        gameCompleted(true);
+                    } else {
+                        // Continue to next bolt
+                        highlightNextBolt();
+                    }
+                } else {
+                    // Wrong tool selected
+                    gameState.errorCount++;
+                    document.getElementById('error-count').textContent = gameState.errorCount;
+                    
+                    // Check if too many errors
+                    if (gameState.errorCount > gameConfig.errorTolerance) {
+                        gameCompleted(false);
+                    }
+                }
+            }
+        });
+    });
+        bolt.addEventListener('click', function() {
+            if (!gameState.active) return;
+            
             // Check if this is the current bolt to remove
             if (this.classList.contains('highlight')) {
                 // Check if the correct tool is selected
