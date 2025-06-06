@@ -3,41 +3,479 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LC Minigames</title>
-    <link rel="stylesheet" href="css/style.css">
+    <title>Wheel UI</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.min.js"></script>
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            font-family: Arial, sans-serif;
+        }
+        
+        #main-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            display: none;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .content-area {
+            display: flex;
+            width: 80%;
+            justify-content: center;
+            align-items: flex-start;
+            gap: 30px;
+        }
+        
+        #wheel-display {
+            width: 800px; /* Doubled from 400px */
+            height: 800px; /* Doubled from 400px */
+            margin-bottom: 30px;
+            background-color: #222;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        #parts-quality {
+            width: 250px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            padding-top: 50px;
+        }
+        
+        .quality-box {
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 8px;
+            padding: 15px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+        }
+        
+        .quality-box h3 {
+            margin-top: 0;
+            margin-bottom: 10px;
+            font-size: 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 5px;
+        }
+        
+        .quality-bar {
+            height: 8px;
+            background-color: #444;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+        
+        .quality-fill {
+            height: 100%;
+            border-radius: 4px;
+        }
+        
+        .excellent {
+            background-color: #4CAF50;
+            width: 100%;
+        }
+        
+        .good {
+            background-color: #8BC34A;
+            width: 75%;
+        }
+        
+        .fair {
+            background-color: #FFC107;
+            width: 50%;
+        }
+        
+        .poor {
+            background-color: #FF5722;
+            width: 25%;
+        }
+        
+        .bolts-container {
+            margin-top: 5px;
+        }
+        
+        .bolt-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+        
+        .bolt-label {
+            width: 60px;
+            font-size: 14px;
+        }
+        
+        .bolt-bar {
+            flex-grow: 1;
+            height: 6px;
+            background-color: #444;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        #button-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        
+        button {
+            padding: 15px 30px;
+            font-size: 18px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        #close-btn {
+            background-color: #f44336;
+            color: white;
+        }
+        
+        #close-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
 </head>
 <body>
-    <!-- Main container for all minigames -->
-    <div id="minigames-container">
-        <!-- Wheel Removal Game -->
-        <div id="wheel-removal-game" class="minigame">
-            <div class="game-header">
-                <h2>Wheel Removal</h2>
-                <div id="timer">Time: <span id="time-left">0</span>s</div>
-                <div id="progress">Progress: <span id="clicks-done">0</span>/<span id="clicks-required">0</span></div>
-                <div id="errors">Errors: <span id="error-count">0</span>/<span id="error-limit">0</span></div>
+    <div id="main-container">
+        <h1>Wheel Customization</h1>
+        
+        <div class="content-area">
+            <div id="wheel-display">
             </div>
             
-            <div class="game-area">
-                <div id="wheel-image">
-                    <div class="bolt bolt-1"></div>
-                    <div class="bolt bolt-2"></div>
-                    <div class="bolt bolt-3"></div>
-                    <div class="bolt bolt-4"></div>
-                    <div class="bolt bolt-5"></div>
+            <div id="parts-quality">
+                <div class="quality-box" id="tire-quality">
+                    <h3>Dæk Kvalitet</h3>
+                    <p>Excellent</p>
+                    <div class="quality-bar">
+                        <div class="quality-fill excellent"></div>
+                    </div>
                 </div>
-                <div id="tool-selection">
-                    <div class="tool" data-tool="wrench">Wrench</div>
-                    <div class="tool" data-tool="impact">Impact Driver</div>
+                
+                <div class="quality-box" id="rim-quality">
+                    <h3>Fælge Kvalitet</h3>
+                    <p>Good</p>
+                    <div class="quality-bar">
+                        <div class="quality-fill good"></div>
+                    </div>
                 </div>
-                <div id="instructions">
-                    Select the correct tool and click on the highlighted bolt to loosen it.
+                
+                <div class="quality-box" id="bolts-quality">
+                    <h3>Bolte Kvalitet</h3>
+                    <div class="bolts-container">
+                        <div class="bolt-item">
+                            <div class="bolt-label">Bolt 1:</div>
+                            <div class="bolt-bar">
+                                <div class="quality-fill excellent"></div>
+                            </div>
+                        </div>
+                        <div class="bolt-item">
+                            <div class="bolt-label">Bolt 2:</div>
+                            <div class="bolt-bar">
+                                <div class="quality-fill good"></div>
+                            </div>
+                        </div>
+                        <div class="bolt-item">
+                            <div class="bolt-label">Bolt 3:</div>
+                            <div class="bolt-bar">
+                                <div class="quality-fill fair"></div>
+                            </div>
+                        </div>
+                        <div class="bolt-item">
+                            <div class="bolt-label">Bolt 4:</div>
+                            <div class="bolt-bar">
+                                <div class="quality-fill poor"></div>
+                            </div>
+                        </div>
+                        <div class="bolt-item">
+                            <div class="bolt-label">Bolt 5:</div>
+                            <div class="bolt-bar">
+                                <div class="quality-fill excellent"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
+        
+        <div id="button-container">
+            <button id="close-btn">Luk Menu</button>
+        </div>
     </div>
 
-    <script src="js/script.js"></script>
-    <script src="js/wheel_removal.js"></script>
+    <script>
+        // Variables
+        let currentWheelModel = "prop_wheel_01";
+        let scene, camera, renderer, controls, wheel;
+        let isThreeJSInitialized = false;
+        
+        // Debug logging function
+        function addDebugMessage(message) {
+            // Debug messages disabled
+            console.log('[DEBUG] ' + message);
+        }
+        
+        // Initialize Three.js
+        function initThreeJS() {
+            if (isThreeJSInitialized) return;
+            
+            try {
+                // Create scene
+                scene = new THREE.Scene();
+                scene.background = new THREE.Color(0x222222);
+                
+                // Create camera
+                camera = new THREE.PerspectiveCamera(60, 1, 0.1, 1000);
+                camera.position.z = 5;
+                
+                // Create renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setSize(800, 800); // Doubled from 400x400
+                document.getElementById('wheel-display').appendChild(renderer.domElement);
+                
+                // Add orbit controls
+                controls = new THREE.OrbitControls(camera, renderer.domElement);
+                controls.enableDamping = true;
+                controls.dampingFactor = 0.25;
+                controls.enableZoom = true;
+                controls.autoRotate = true;
+                controls.autoRotateSpeed = 2.0;
+                
+                // Add lights
+                const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+                scene.add(ambientLight);
+                
+                const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+                directionalLight.position.set(5, 5, 5);
+                directionalLight.castShadow = true;
+                scene.add(directionalLight);
+                
+                const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
+                directionalLight2.position.set(-5, -5, -5);
+                scene.add(directionalLight2);
+                
+                // Create wheel model
+                createWheel(currentWheelModel);
+                
+                // Start animation loop
+                animate();
+                
+                isThreeJSInitialized = true;
+                addDebugMessage('Three.js initialized successfully');
+            } catch (error) {
+                addDebugMessage('Error initializing Three.js: ' + error.message);
+            }
+        }
+        
+        // Create a 3D wheel model
+        function createWheel(modelName) {
+            addDebugMessage('Creating 3D wheel model: ' + modelName);
+            
+            // Remove existing wheel if any
+            if (wheel) {
+                scene.remove(wheel);
+            }
+            
+            // Use the wheel model from config
+            wheel = new THREE.Group();
+            
+            // Create tire (black outer part)
+            const tireGeometry = new THREE.TorusGeometry(2, 0.7, 32, 100);
+            const tireMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x111111, 
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            const tire = new THREE.Mesh(tireGeometry, tireMaterial);
+            wheel.add(tire);
+            
+            // Create inner rim (black inside)
+            const innerRimGeometry = new THREE.CylinderGeometry(1.4, 1.4, 0.5, 32);
+            const innerRimMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x111111, 
+                roughness: 0.8,
+                metalness: 0.1
+            });
+            const innerRim = new THREE.Mesh(innerRimGeometry, innerRimMaterial);
+            innerRim.rotation.x = Math.PI / 2;
+            wheel.add(innerRim);
+            
+            // Create the metal center crossbar
+            const crossMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0xcccccc, 
+                roughness: 0.3,
+                metalness: 0.9
+            });
+
+            // Create a more complex rim design based on the model name
+            if (modelName === "prop_wheel_01") {
+                // Standard cross design for prop_wheel_01
+                const crossGeometry = new THREE.BoxGeometry(3.0, 0.6, 0.1);
+                const crossbar = new THREE.Mesh(crossGeometry, crossMaterial);
+                wheel.add(crossbar);
+                
+                // Add a perpendicular crossbar
+                const crossGeometry2 = new THREE.BoxGeometry(0.6, 3.0, 0.1);
+                const crossbar2 = new THREE.Mesh(crossGeometry2, crossMaterial);
+                wheel.add(crossbar2);
+            } else {
+                // For other models, create a 5-spoke design
+                for (let i = 0; i < 5; i++) {
+                    const spokeGeometry = new THREE.BoxGeometry(2.0, 0.4, 0.1);
+                    const spoke = new THREE.Mesh(spokeGeometry, crossMaterial);
+                    spoke.position.z = 0.05;
+                    spoke.rotation.z = (i / 5) * Math.PI * 2;
+                    wheel.add(spoke);
+                }
+                
+                // Add center cap
+                const centerCapGeometry = new THREE.CylinderGeometry(0.5, 0.5, 0.1, 32);
+                const centerCapMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x888888,
+                    roughness: 0.5,
+                    metalness: 0.8
+                });
+                const centerCap = new THREE.Mesh(centerCapGeometry, centerCapMaterial);
+                centerCap.rotation.x = Math.PI / 2;
+                centerCap.position.z = 0.1;
+                wheel.add(centerCap);
+            }
+            
+            // Add the model to the scene
+            scene.add(wheel);
+            
+            // Set camera position to better view the wheel
+            camera.position.set(0, 0, 5);
+            camera.lookAt(0, 0, 0);
+        }
+        
+        // Animation loop
+        function animate() {
+            requestAnimationFrame(animate);
+            if (controls) controls.update();
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        // Set up event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            addDebugMessage('UI loaded successfully');
+            
+            // Close button
+            document.getElementById('close-btn').addEventListener('click', function() {
+                addDebugMessage('Close button clicked');
+                fetch(`https://${GetParentResourceName()}/closeUI`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                }).catch(error => addDebugMessage('Error sending closeUI: ' + error));
+            });
+            
+            // Ensure UI is hidden by default
+            document.getElementById('main-container').style.display = 'none';
+        });
+
+        // Message handler
+        window.addEventListener('message', function(event) {
+            const data = event.data;
+            addDebugMessage('Received message: ' + JSON.stringify(data));
+            
+            if (data.action === 'toggleUI') {
+                document.getElementById('main-container').style.display = data.show ? 'flex' : 'none';
+                addDebugMessage('UI visibility set to: ' + (data.show ? 'visible' : 'hidden'));
+                
+                if (data.show) {
+                    // Set current wheel model if provided
+                    if (data.wheelModel) {
+                        currentWheelModel = data.wheelModel;
+                        addDebugMessage('Wheel model set to: ' + currentWheelModel);
+                    }
+                    
+                    // Set part qualities if provided
+                    if (data.qualities) {
+                        updatePartQualities(data.qualities);
+                    }
+                    
+                    // Initialize Three.js
+                    setTimeout(() => {
+                        initThreeJS();
+                        // Ensure we're creating the wheel using the model from config
+                        createWheel(currentWheelModel);
+                    }, 100);
+                }
+            } else if (data.action === 'updateQualities') {
+                // Update part qualities
+                updatePartQualities(data.qualities);
+            }
+        });
+        
+        // Function to update part qualities
+        function updatePartQualities(qualities) {
+            if (qualities.tire) {
+                const tireBox = document.getElementById('tire-quality');
+                const tireText = tireBox.querySelector('p');
+                const tireFill = tireBox.querySelector('.quality-fill');
+                
+                tireText.textContent = qualities.tire.label || 'Unknown';
+                tireFill.className = 'quality-fill ' + (qualities.tire.class || 'fair');
+            }
+            
+            if (qualities.rim) {
+                const rimBox = document.getElementById('rim-quality');
+                const rimText = rimBox.querySelector('p');
+                const rimFill = rimBox.querySelector('.quality-fill');
+                
+                rimText.textContent = qualities.rim.label || 'Unknown';
+                rimFill.className = 'quality-fill ' + (qualities.rim.class || 'fair');
+            }
+            
+            if (qualities.bolts && Array.isArray(qualities.bolts)) {
+                const boltsContainer = document.querySelector('.bolts-container');
+                const boltItems = boltsContainer.querySelectorAll('.bolt-item');
+                
+                // Update each bolt quality
+                for (let i = 0; i < Math.min(boltItems.length, qualities.bolts.length); i++) {
+                    const boltItem = boltItems[i];
+                    const boltQuality = qualities.bolts[i];
+                    const boltBar = boltItem.querySelector('.bolt-bar');
+                    const boltFill = boltBar.querySelector('.quality-fill');
+                    
+                    boltFill.className = 'quality-fill ' + (boltQuality.class || 'fair');
+                }
+            }
+        }
+
+        // Keyboard events
+        document.onkeyup = function(data) {
+            if (data.key === 'Escape') {
+                addDebugMessage('Escape key pressed');
+                fetch(`https://${GetParentResourceName()}/closeUI`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({})
+                }).catch(error => addDebugMessage('Error sending closeUI: ' + error));
+            }
+        };
+    </script>
 </body>
 </html>

@@ -1,29 +1,32 @@
 fx_version 'cerulean'
 game 'gta5'
+lua54 'yes'
 
-description 'LC Minigames - Including Wheel Removal Game'
-author 'Your Name'
+description 'LC_Minigames'
 version '1.0.0'
-
-ui_page 'html/index.html'
+author 'LC Development'
 
 shared_scripts {
-    'config.lua',
+    '@ox_lib/init.lua',
+    'shared/config.lua'
 }
 
 client_scripts {
-    'client/main.lua',
-    'client/wheel_removal.lua',
+    'client.lua',
 }
 
 server_scripts {
-    'server/main.lua',
+    'server.lua'
 }
 
+ui_page 'html/index.html'
+
 files {
-    'html/index.html',
-    'html/css/style.css',
-    'html/js/script.js',
-    'html/js/wheel_removal.js',
-    'html/img/*.png',
+    'html/index.html'
+}
+
+dependencies {
+    'ox_lib',
+    'ox_target',
+    'ox_inventory'
 }
